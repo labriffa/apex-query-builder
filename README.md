@@ -19,8 +19,25 @@ new QueryBuilder(Opportunity.SObjectType)
     })
 .toString();
 ```
+### Example 2: Subqueries (parent-to-child)
 
-### Example 2: Complex Single Object Query
+#### SOQL
+```
+SELECT Id, (SELECT Name FROM Opportunities) 
+FROM Account
+```
+
+#### QueryBuilder
+```
+new QueryBuilder(Account.SObjectType)
+    .selectField(Account.Id)
+    .subQuery(new QueryBuilder(Opportunity.SObjectType)
+        .selectField(Opportunity.Name)
+    )
+.toString();
+```
+
+### Example 3: Complex Single Object Query
 
 #### SOQL
 ```
@@ -46,21 +63,21 @@ OFFSET 3
 ```
 new QueryBuilder(Opportunity.SObjectType)
   .selectFields(new SObjectField[] {
-    Opportunity.Id,
-    Opportunity.Name,
-    Opportunity.CloseDate,
-    Opportunity.StageName
+      Opportunity.Id,
+      Opportunity.Name,
+      Opportunity.CloseDate,
+      Opportunity.StageName
   })
   .whereClause(new QueryCondition()
-    .isToday(Opportunity.CloseDate)                                   
-    .equals(Opportunity.StageName, 'Closed Won')                  
-    .greaterThan(Opportunity.Amount, 100)                            
-    .andGroup(new QueryCondition()                               
-      .group(new QueryCondition()                                 
-        .isNotNull(Opportunity.NextStep)                             
-        .isFalse(Opportunity.IsPrivate)                               
-        .isLike(Opportunity.Name, '%(IT)%')                           
-      )
+      .isToday(Opportunity.CloseDate)                                   
+      .equals(Opportunity.StageName, 'Closed Won')                  
+      .greaterThan(Opportunity.Amount, 100)                            
+      .andGroup(new QueryCondition()                               
+        .group(new QueryCondition()                                 
+          .isNotNull(Opportunity.NextStep)                             
+          .isFalse(Opportunity.IsPrivate)                               
+          .isLike(Opportunity.Name, '%(IT)%')                           
+        )
       .orCondition(new QueryCondition().isNotNull(Opportunity.Type))
     )
   )
