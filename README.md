@@ -1,15 +1,39 @@
 # Apex SimpleQueryBuilder
 
-### Example 1: The Basic Query
+<a name="index_block"></a>
 
-#### SOQL
-```
+* [1. Building Queries](#block1)
+    * [1.1. SELECT Statement](#block1.1)     
+        * [1.1.1. Basic SELECT statement](#block1.1.1) 
+        * [1.1.2. SELECT with WHERE statement](#block1.1.2)
+        * [1.1.3. SELECT with aggregate functions](#block1.1.3)
+        * [1.1.4. SELECT with related fields (cross-object SOQL query)](#block1.1.4)
+    * [1.2. Conditions](#block1.2)
+        * [1.2.1. Comparison Operators](#block1.2.1)
+        * [1.2.2. Logical Operators](#block1.2.2)  
+            * [1.2.1.1. AND Comparison Operator](#block1.2.2.1) 
+            * [1.2.1.2. AND Grouped Comparison Operator](#block1.2.2.2)
+            * [1.2.1.3. OR Comparison Operator](#block1.2.2.3)
+            * [1.2.1.4. OR Grouped Comparison Operator](#block1.2.2.4)
+    * [1.3. Subqueries (parent-to-child)](#block1.3)
+* [2. Authors](#block2)
+* [3. License](#block3)
+
+<a name="block1"></a>
+## 1. Building Queries [↑](#index_block)
+<a name="block1.1"></a>
+### 1.1. SELECT Statement
+<a name="block1.1.1"></a>
+#### 1.1.1. Basic SELECT statement
+
+**SOQL**
+```sql
 SELECT Id, Name, CloseDate, StageName 
 FROM Opportunity
 ```
 
-#### QueryBuilder
-```
+**QueryBuilder**
+```apex
 new QueryBuilder(Opportunity.SObjectType)
     .selectFields(new SObjectField[] {
       Opportunity.Id,
@@ -19,28 +43,67 @@ new QueryBuilder(Opportunity.SObjectType)
     })
 .toString();
 ```
-### Example 2: Subqueries (parent-to-child)
+<a name="block1.1.2"></a>
+#### 1.1.2. SELECT with WHERE statement
 
-#### SOQL
+**SOQL**
+```sql
+SELECT Id, Name, CloseDate, StageName 
+FROM Opportunity
+WHERE Amount > 100
 ```
-SELECT Id, (SELECT Name FROM Opportunities) 
-FROM Account
-```
-
-#### QueryBuilder
-```
-new QueryBuilder(Account.SObjectType)
-    .selectField(Account.Id)
-    .subQuery(new QueryBuilder(Opportunity.SObjectType)
-        .selectField(Opportunity.Name)
+**QueryBuilder**
+```apex
+new QueryBuilder(Opportunity.SObjectType)
+    .selectFields(new SObjectField[] {
+        Opportunity.Id,
+        Opportunity.Name,
+        Opportunity.CloseDate,
+        Opportunity.StageName
+    })
+    .whereClause(new QueryCondition()
+        .greaterThan(Opportunity.Amount, 100)
     )
+.toString();
+```
+<a name="block1.1.3"></a>
+#### 1.1.3. SELECT with aggregate functions
+
+**SOQL**
+```sql
+SELECT AVG(Amount) 
+FROM Opportunity
+```
+
+**QueryBuilder**
+```apex
+new QueryBuilder(Opportunity.SObjectType)
+    .selectAverageField(new SObjectField[] {
+        Opportunity.Amount
+    })
+.toString();
+```
+<a name="block1.1.4"></a>
+#### 1.1.4. SELECT with related fields (cross-object SOQL query)
+
+**SOQL**
+```sql
+SELECT Name, Account.NumberOfEmployees
+FROM Contact
+```
+
+**QueryBuilder**
+```apex
+new QueryBuilder(Contact.SObjectType)
+    .selectField(Contact.Name)
+    .selectRelatedField(Contact.Account, Account.NumberOfEmployees)
 .toString();
 ```
 
 ### Example 3: Complex Single Object Query
 
-#### SOQL
-```
+**SOQL**
+```sql
 SELECT Id, Name, CloseDate, StageName
 FROM Opportunity
 WHERE
@@ -59,8 +122,8 @@ LIMIT 5
 OFFSET 3
 ```    
 
-#### QueryBuilder
-```
+**QueryBuilder**
+```apex
 new QueryBuilder(Opportunity.SObjectType)
   .selectFields(new SObjectField[] {
       Opportunity.Id,
@@ -85,4 +148,157 @@ new QueryBuilder(Opportunity.SObjectType)
   .take(5)
   .skip(3)
 .toString();
+```
+
+<a name="block1.2"></a>
+### 1.2. Conditions [↑](#index_block)
+<a name="block1.2.1"></a>
+#### 1.2.1. Comparison Operators
+
+**SOQL**
+```sql
+WHERE
+    Name = 'Joe Bloggs'
+    AND Birthdate = 1970-01-1
+    AND DoNotCall = False
+    AND HasOptedOutOfEmail = True
+    AND Title != NULL
+```    
+
+
+**QueryBuilder**
+```apex
+  .whereClause(new QueryCondition()
+      .equals(Contact.Name, 'Joe Bloggs',
+      .equals(Contact.Birthdate, Date.today())
+      .isFalse(Contact.DoNotCall)
+      .isTrue(Contact.HasOptedOutOfEmail)
+      .isNotNull(Contact.Title)
+  )
+```
+
+<a name="block1.2.2"></a>
+#### 1.2.2. Logical Operators
+<a name="block1.2.2.1"></a>
+##### 1.2.2.1 AND Comparison Operator
+**AND** operations occur implicitly if no logical operators are used in condition chaining
+
+**SOQL**
+```sql
+WHERE
+    Name = 'Joe Bloggs'
+    AND Birthdate = 1970-01-1
+```   
+
+**QueryBuilder**
+```apex
+  .whereClause(new QueryCondition()
+      .equals(Contact.Name, 'Joe Bloggs',
+      .equals(Contact.Birthdate, Date.newInstance(1970, 1, 1))
+  )
+```
+
+<a name="block1.2.2.2"></a>
+##### 1.2.2.2 AND Grouped Comparison Operator
+
+**SOQL**
+```sql
+WHERE
+    Name = 'Joe Bloggs'
+    AND (Birthdate = 1970-01-1 AND DoNotCall = False)
+```   
+
+**QueryBuilder**
+```apex
+  .whereClause(new QueryCondition()
+      .equals(Contact.Name, 'Joe Bloggs'
+      .andGroup(new QueryCondition()
+          .equals(Contact.Birthdate, Date.newInstance(1970, 1, 1))
+          .isFalse(Contact.DoNotCall)
+      )    
+  )
+```
+<a name="block1.2.2.3"></a>
+##### 1.2.2.3 OR Comparison Operator
+```sql
+WHERE
+    Name = 'Joe Bloggs'
+    OR Name = 'Mary Bloggs'
+```   
+
+**QueryBuilder**
+```apex
+  .whereClause(new QueryCondition()
+      .equals(Contact.Name, 'Joe Bloggs'
+      .orCondition(new QueryCondition().equals(Contact.Name, 'Mary Bloggs') 
+  )
+```
+
+<a name="block1.2.2.4"></a>
+##### 1.2.2.4 OR Grouped Comparison Operator
+```sql
+WHERE
+    Name = 'Joe Bloggs'
+    OR (Name = 'Mary Bloggs' AND DoNotCall = False)
+```   
+
+**QueryBuilder**
+```apex
+  .whereClause(new QueryCondition()
+      .equals(Contact.Name, 'Joe Bloggs'
+      .orGroup(new QueryCondition()
+          .equals(Contact.Name, 'Mary Bloggs'
+          .isFalse(Contact.DoNotCall)
+      ) 
+  )
+```
+
+<a name="block1.3"></a>
+## 1.3 Subqueries (parent-to-child) [↑](#index_block)
+Child relationship names are implicity determined by the ```ChildRelationship``` class and ```getChildRelationships()``` method on the ```Schema.DescribeFieldResult``` object that's associaated with the ```SObjectType``` that gets passed into the QueryBuilder constructor.
+
+**SOQL**
+```sql
+SELECT Id, (SELECT Name FROM Opportunities) 
+FROM Account
+```
+
+**QueryBuilder**
+```apex
+new QueryBuilder(Account.SObjectType)
+    .selectField(Account.Id)
+    .subQuery(new QueryBuilder(Opportunity.SObjectType)
+        .selectField(Opportunity.Name)
+    )
+.toString();
+```
+
+<a name="block2"></a>
+## 2. Authors [↑](#index_block)
+- Lewis Briffa
+
+<a name="block3"></a>
+## 3. License [↑](#index_block)
+A Query Builder is licensed under the MIT license.
+
+```
+Copyright (c) 2020 Lewis Briffa
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
 ```
