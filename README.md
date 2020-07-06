@@ -1,4 +1,13 @@
-# Apex SimpleQueryBuilder
+# Apex Query Builder
+
+An Apex query builder designed using the builder pattern. Built predomiently to address the issues concerning dynamic string based queries used in scenarios such as Batch Apex classes. 
+
+Apex Query Builder offers the following benefits:
+
+- Allows users to take advantage of IDE auto-completion (such as those found in IlluminatedCloud) by using field references via the ```SObjectField``` class as oppose to the developer having to rely on memorizing all field developer names belonging to their system objects. 
+- Comments can easily be added in-between method chains, promoting code readability
+- Promotes the prevention of SOQL injection through typecasting on ```QueryCondition``` API methods such as ```greaterThan()```
+- String based field referencing is vunerable to system deletion, Salesforce won't pickup field references in hardcoded dynamic strings and therefore won't provide you with any protection when you come to delete the field in question, Apex Query Builder resolves this by allowing an entire SOQL query to be built with nothing but ```SObjectField``` references.
 
 <a name="index_block"></a>
 
@@ -292,7 +301,7 @@ new QueryBuilder(Account.SObjectType)
 
 <a name="block3"></a>
 ## 3. License [↑](#index_block)
-A Query Builder is licensed under the MIT license.
+Apex Query Builder is licensed under the MIT license.
 
 ```
 Copyright (c) 2020 Lewis Briffa
