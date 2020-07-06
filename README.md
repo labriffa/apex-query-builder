@@ -1,6 +1,8 @@
 # Apex Query Builder
 
-An Apex query builder designed using the builder pattern. Built predomiently to address the issues concerning dynamic string based queries used in scenarios such as Batch Apex classes. 
+![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+
+An Apex query builder designed using the builder pattern. Built predomiently to address the issues concerning dynamic string based querying used in scenarios such as Batch Apex classes. 
 
 Apex Query Builder offers the following benefits:
 
@@ -16,8 +18,7 @@ Apex Query Builder offers the following benefits:
         * [1.1.1. Basic SELECT statement](#block1.1.1) 
         * [1.1.2. SELECT with WHERE statement](#block1.1.2)
         * [1.1.3. SELECT with aggregate functions](#block1.1.3)
-        * [1.1.4. SELECT with related fields (cross-object SOQL query)](#block1.1.4)
-        * [1.1.5. SELECT Complex Single Object](#block1.1.5)
+        * [1.1.4. SELECT Complex Single Object](#block1.1.4)
     * [1.2. Conditions](#block1.2)
         * [1.2.1. Comparison Operators](#block1.2.1)
         * [1.2.2. Logical Operators](#block1.2.2)  
@@ -43,7 +44,7 @@ SELECT Id, Name, CloseDate, StageName
 FROM Opportunity
 ```
 
-QueryBuilder
+Apex Query Builder
 ```apex
 new QueryBuilder(Opportunity.SObjectType)
     .selectFields(new SObjectField[] {
@@ -64,7 +65,7 @@ SELECT Id, Name, CloseDate, StageName
 FROM Opportunity
 WHERE Amount > 100
 ```
-QueryBuilder
+Apex Query Builder
 ```apex
 new QueryBuilder(Opportunity.SObjectType)
     .selectFields(new SObjectField[] {
@@ -84,41 +85,25 @@ All SOQL aggregate functions are supported. Aliases can be passed in as a second
 
 SOQL
 ```sql
-SELECT AVG(Amount), MIN(Amount), MAX(Amount), SUM(Amount), COUNT(Id), COUNT_DISTINCT(Id)
+SELECT AVG(Amount), MIN(Amount), MAX(Amount), SUM(Amount), COUNT(Id), COUNT_DISTINCT(Type)
 FROM Opportunity
 ```
 
-QueryBuilder
+Apex Query Builder
 ```apex
 new QueryBuilder(Opportunity.SObjectType)
     .selectAverageField(Opportunity.Amount)
     .selectMinField(Opportunity.Amount)
     .selectMaxField(Opportunity.Amount)
     .selectSumField(Opportunity.Amount)
-    .count(Opportunity.Id)
+    .selectCountField(Opportunity.Id)
     .selectCountDistinctField(Opportunity.Type)
 .toString();
 ```
+
 <a name="block1.1.4"></a>
-#### 1.1.4. SELECT with related fields (cross-object SOQL query)
-Cross-object SOQL queries are supported without the need to hardcode string references to related fields. Related fields can be added individually via ```selectRelatedField()``` or as a list of related fields via ```selectRelatedFields()```. The first parameter is the lookup field reference, the second is the field reference or a list of field references on the parent object.
-
-SOQL
-```sql
-SELECT Name, Account.NumberOfEmployees
-FROM Contact
-```
-
-QueryBuilder
-```apex
-new QueryBuilder(Contact.SObjectType)
-    .selectField(Contact.Name)
-    .selectRelatedField(Contact.Account, Account.NumberOfEmployees)
-.toString();
-```
-
-<a name="block1.1.5"></a>
-#### 1.1.5. SELECT Complex Single Object
+#### 1.1.4. SELECT Complex Single Object
+Apex Query Builder supports parentheses through the use of ```andGroup```, ```orGroup``` and ```group```. 
 
 SOQL
 ```sql
@@ -140,7 +125,7 @@ LIMIT 5
 OFFSET 3
 ```    
 
-QueryBuilder
+Apex Query Builder
 ```apex
 new QueryBuilder(Opportunity.SObjectType)
   .selectFields(new SObjectField[] {
@@ -184,11 +169,11 @@ WHERE
 ```    
 
 
-QueryBuilder
+Apex Query Builder
 ```apex
   .whereClause(new QueryCondition()
       .equals(Contact.Name, 'Joe Bloggs',
-      .equals(Contact.Birthdate, Date.today())
+      .equals(Contact.Birthdate, Date.newInstance(1970, 1, 1))
       .isFalse(Contact.DoNotCall)
       .isTrue(Contact.HasOptedOutOfEmail)
       .isNotNull(Contact.Title)
@@ -208,7 +193,7 @@ WHERE
     AND Birthdate = 1970-01-1
 ```   
 
-QueryBuilder
+Apex Query Builder
 ```apex
   .whereClause(new QueryCondition()
       .equals(Contact.Name, 'Joe Bloggs',
@@ -226,7 +211,7 @@ WHERE
     AND (Birthdate = 1970-01-1 AND DoNotCall = False)
 ```   
 
-QueryBuilder
+Apex Query Builder
 ```apex
   .whereClause(new QueryCondition()
       .equals(Contact.Name, 'Joe Bloggs'
@@ -246,7 +231,7 @@ WHERE
     OR Name = 'Mary Bloggs'
 ```   
 
-QueryBuilder
+Apex Query Builder
 ```apex
   .whereClause(new QueryCondition()
       .equals(Contact.Name, 'Joe Bloggs'
@@ -264,7 +249,7 @@ WHERE
     OR (Name = 'Mary Bloggs' AND DoNotCall = False)
 ```   
 
-QueryBuilder
+Apex Query Builder
 ```apex
   .whereClause(new QueryCondition()
       .equals(Contact.Name, 'Joe Bloggs'
@@ -285,7 +270,7 @@ SELECT Id, (SELECT Name FROM Opportunities)
 FROM Account
 ```
 
-QueryBuilder
+Apex Query Builder
 ```apex
 new QueryBuilder(Account.SObjectType)
     .selectField(Account.Id)
