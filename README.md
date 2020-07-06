@@ -8,6 +8,7 @@
         * [1.1.2. SELECT with WHERE statement](#block1.1.2)
         * [1.1.3. SELECT with aggregate functions](#block1.1.3)
         * [1.1.4. SELECT with related fields (cross-object SOQL query)](#block1.1.4)
+        * [1.1.5. SELECT Complex Single Object](#block1.1.5)
     * [1.2. Conditions](#block1.2)
         * [1.2.1. Comparison Operators](#block1.2.1)
         * [1.2.2. Logical Operators](#block1.2.2)  
@@ -23,16 +24,17 @@
 ## 1. Building Queries [↑](#index_block)
 <a name="block1.1"></a>
 ### 1.1. SELECT Statement
+Fields can either be passed in as singular values using ```selectField()``` or alternatively a list of field references can be passed in via ```selectFields()```.
 <a name="block1.1.1"></a>
 #### 1.1.1. Basic SELECT statement
 
-**SOQL**
+SOQL
 ```sql
 SELECT Id, Name, CloseDate, StageName 
 FROM Opportunity
 ```
 
-**QueryBuilder**
+QueryBuilder
 ```apex
 new QueryBuilder(Opportunity.SObjectType)
     .selectFields(new SObjectField[] {
@@ -45,14 +47,15 @@ new QueryBuilder(Opportunity.SObjectType)
 ```
 <a name="block1.1.2"></a>
 #### 1.1.2. SELECT with WHERE statement
+To construct the where clause in a given query a ```QueryCondition``` object reference is used to build out the condition statements.
 
-**SOQL**
+SOQL
 ```sql
 SELECT Id, Name, CloseDate, StageName 
 FROM Opportunity
 WHERE Amount > 100
 ```
-**QueryBuilder**
+QueryBuilder
 ```apex
 new QueryBuilder(Opportunity.SObjectType)
     .selectFields(new SObjectField[] {
@@ -68,31 +71,36 @@ new QueryBuilder(Opportunity.SObjectType)
 ```
 <a name="block1.1.3"></a>
 #### 1.1.3. SELECT with aggregate functions
+All SOQL aggregate functions are supported. Aliases can be passed in as a second parameter.
 
-**SOQL**
+SOQL
 ```sql
-SELECT AVG(Amount) 
+SELECT AVG(Amount), MIN(Amount), MAX(Amount), SUM(Amount), COUNT(Id), COUNT_DISTINCT(Id)
 FROM Opportunity
 ```
 
-**QueryBuilder**
+QueryBuilder
 ```apex
 new QueryBuilder(Opportunity.SObjectType)
-    .selectAverageField(new SObjectField[] {
-        Opportunity.Amount
-    })
+    .selectAverageField(Opportunity.Amount)
+    .selectMinField(Opportunity.Amount)
+    .selectMaxField(Opportunity.Amount)
+    .selectSumField(Opportunity.Amount)
+    .count(Opportunity.Id)
+    .selectCountDistinctField(Opportunity.Type)
 .toString();
 ```
 <a name="block1.1.4"></a>
 #### 1.1.4. SELECT with related fields (cross-object SOQL query)
+Cross-object SOQL queries are supported without the need to hardcode string references to related fields. Related fields can be added individually via ```selectRelatedField()``` or as a list of related fields via ```selectRelatedFields()```. The first parameter is the lookup field reference, the second is the field reference or a list of field references on the parent object.
 
-**SOQL**
+SOQL
 ```sql
 SELECT Name, Account.NumberOfEmployees
 FROM Contact
 ```
 
-**QueryBuilder**
+QueryBuilder
 ```apex
 new QueryBuilder(Contact.SObjectType)
     .selectField(Contact.Name)
@@ -100,9 +108,10 @@ new QueryBuilder(Contact.SObjectType)
 .toString();
 ```
 
-### Example 3: Complex Single Object Query
+<a name="block1.1.5"></a>
+#### 1.1.5. SELECT Complex Single Object
 
-**SOQL**
+SOQL
 ```sql
 SELECT Id, Name, CloseDate, StageName
 FROM Opportunity
@@ -122,7 +131,7 @@ LIMIT 5
 OFFSET 3
 ```    
 
-**QueryBuilder**
+QueryBuilder
 ```apex
 new QueryBuilder(Opportunity.SObjectType)
   .selectFields(new SObjectField[] {
@@ -155,7 +164,7 @@ new QueryBuilder(Opportunity.SObjectType)
 <a name="block1.2.1"></a>
 #### 1.2.1. Comparison Operators
 
-**SOQL**
+SOQL
 ```sql
 WHERE
     Name = 'Joe Bloggs'
@@ -166,7 +175,7 @@ WHERE
 ```    
 
 
-**QueryBuilder**
+QueryBuilder
 ```apex
   .whereClause(new QueryCondition()
       .equals(Contact.Name, 'Joe Bloggs',
@@ -183,14 +192,14 @@ WHERE
 ##### 1.2.2.1 AND Comparison Operator
 **AND** operations occur implicitly if no logical operators are used in condition chaining
 
-**SOQL**
+SOQL
 ```sql
 WHERE
     Name = 'Joe Bloggs'
     AND Birthdate = 1970-01-1
 ```   
 
-**QueryBuilder**
+QueryBuilder
 ```apex
   .whereClause(new QueryCondition()
       .equals(Contact.Name, 'Joe Bloggs',
@@ -201,14 +210,14 @@ WHERE
 <a name="block1.2.2.2"></a>
 ##### 1.2.2.2 AND Grouped Comparison Operator
 
-**SOQL**
+SOQL
 ```sql
 WHERE
     Name = 'Joe Bloggs'
     AND (Birthdate = 1970-01-1 AND DoNotCall = False)
 ```   
 
-**QueryBuilder**
+QueryBuilder
 ```apex
   .whereClause(new QueryCondition()
       .equals(Contact.Name, 'Joe Bloggs'
@@ -220,13 +229,15 @@ WHERE
 ```
 <a name="block1.2.2.3"></a>
 ##### 1.2.2.3 OR Comparison Operator
+
+SOQL
 ```sql
 WHERE
     Name = 'Joe Bloggs'
     OR Name = 'Mary Bloggs'
 ```   
 
-**QueryBuilder**
+QueryBuilder
 ```apex
   .whereClause(new QueryCondition()
       .equals(Contact.Name, 'Joe Bloggs'
@@ -236,13 +247,15 @@ WHERE
 
 <a name="block1.2.2.4"></a>
 ##### 1.2.2.4 OR Grouped Comparison Operator
+
+SOQL
 ```sql
 WHERE
     Name = 'Joe Bloggs'
     OR (Name = 'Mary Bloggs' AND DoNotCall = False)
 ```   
 
-**QueryBuilder**
+QueryBuilder
 ```apex
   .whereClause(new QueryCondition()
       .equals(Contact.Name, 'Joe Bloggs'
@@ -257,13 +270,13 @@ WHERE
 ## 1.3 Subqueries (parent-to-child) [↑](#index_block)
 Child relationship names are implicity determined by the ```ChildRelationship``` class and ```getChildRelationships()``` method on the ```Schema.DescribeFieldResult``` object that's associaated with the ```SObjectType``` that gets passed into the QueryBuilder constructor.
 
-**SOQL**
+SOQL
 ```sql
 SELECT Id, (SELECT Name FROM Opportunities) 
 FROM Account
 ```
 
-**QueryBuilder**
+QueryBuilder
 ```apex
 new QueryBuilder(Account.SObjectType)
     .selectField(Account.Id)
