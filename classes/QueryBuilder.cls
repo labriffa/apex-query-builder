@@ -1,7 +1,5 @@
 /**
  * A class utilising the builder design pattern to abstract the building of queries.
- *
- *
  */
 public class QueryBuilder {
 	// The fully built SOQL query

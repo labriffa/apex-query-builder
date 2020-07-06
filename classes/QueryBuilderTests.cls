@@ -35,26 +35,6 @@ public class QueryBuilderTests {
 	}
 
 	@IsTest
-	public static void testRelatedFields() {
-		String query = new QueryBuilder(Contact.SObjectType)
-			.selectFields(new SObjectField[] {
-				Opportunity.Id
-			})
-			.selectRelatedField(Account.SObjectType, Account.Name)
-			.selectRelatedFields(Account.SObjectType, new List<SObjectField> {
-					Account.AnnualRevenue,
-					Account.Phone
-				})
-		.toString();
-
-		Test.startTest();
-		new SOQLTester().tryQuery(query);
-		Test.stopTest();
-
-		System.assertEquals('SELECT Id, Account.Name, Account.AnnualRevenue, Account.Phone FROM Contact', query);
-	}
-
-	@IsTest
 	public static void testWhereClauseQuery() {
 		String query = new QueryBuilder(Opportunity.SObjectType)
 			.selectFields(new SObjectField[] {
