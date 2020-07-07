@@ -63,6 +63,35 @@ public class QueryBuilder {
 		return this;
 	}
 
+	/**
+	 * Allows cross-object SOQL queries to be constructed on standard relationships
+	 *
+	 * @param objectType	An object type reference to the relation object
+	 * @param field			A field reference from the related object
+	 *
+	 * @return			The current instance of the QueryBuilder
+	 */
+	public QueryBuilder selectRelatedField(SObjectType objectType, SObjectField field) {
+		selectedFields.add(objectType.getDescribe().getName() + '.' + field.getDescribe().getName());
+		return this;
+	}
+
+	/**
+	 * Allows cross-object SOQL queries to be constructed on custom relationships
+	 *
+	 * @param lookupField		A field reference to the relation object
+	 * @param field				A field reference from the related object
+	 *
+	 * @return			The current instance of the QueryBuilder
+	 */
+	public QueryBuilder selectRelatedField(SObjectField lookupField, SObjectField field) {
+		String relationshipObjectName = lookupField.getDescribe().getName();
+		selectedFields.add(
+			relationshipObjectName.substring(0, relationshipObjectName.length() - 1) + 'r.' + field.getDescribe().getName()
+		);
+		return this;
+	}
+
 	@TestVisible
 	private SObjectType getEntity() {
 		return entity;

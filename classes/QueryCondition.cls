@@ -252,19 +252,6 @@ public class QueryCondition implements QueryConditionI {
 	}
 
 	/**
-	 * Handles the creation of the 'IN' comparison operator against a given value
-	 *
-	 * @param field			A field reference to apply the operator to
-	 * @param value			The value to check against
-	 *
-	 * @return		The current instance of the QueryBuilder
-	 */
-	public QueryCondition isIn(SObjectField field, Object value) {
-		addStatement(field, 'IN', '(\'' + String.valueOf(value) + '\')');
-		return this;
-	}
-
-	/**
 	 * Handles the creation of the 'IN' comparison operator for a list of values
 	 *
 	 * @param field			A field reference to apply the operator to
@@ -276,7 +263,11 @@ public class QueryCondition implements QueryConditionI {
 		List<String> valuesStr = new List<String>();
 
 		for(Integer i = 0; i < values.size(); i++) {
-			valuesStr.add('\'' + String.valueOf(values[i]) + '\'');
+			if(values[i] instanceof Id) {
+				valuesStr.add('\'' + String.valueOf(values[i]).substring(0, 15) + '\'');
+			} else {
+				valuesStr.add('\'' + String.valueOf(values[i]) + '\'');
+			}
 		}
 
 		addStatement(field, 'IN', valuesStr);
@@ -310,19 +301,6 @@ public class QueryCondition implements QueryConditionI {
 	}
 
 	/**
-	 * Handles the creation of the 'NOT IN' comparison operator against a given value
-	 *
-	 * @param field			A field reference to apply the operator to
-	 * @param value			The value to check against
-	 *
-	 * @return		The current instance of the QueryBuilder
-	 */
-	public QueryCondition isNotIn(SObjectField field, Object value) {
-		addStatement(field, 'NOT IN', '(\'' + String.valueOf(value) + '\')');
-		return this;
-	}
-
-	/**
 	 * Handles the creation of the 'NOT IN' comparison operator for a list of values
 	 *
 	 * @param field			A field reference to apply the operator to
@@ -334,7 +312,11 @@ public class QueryCondition implements QueryConditionI {
 		List<String> valuesStr = new List<String>();
 
 		for(Integer i = 0; i < values.size(); i++) {
-			valuesStr.add('\'' + String.valueOf(values[i]) + '\'');
+			if(values[i] instanceof Id) {
+				valuesStr.add('\'' + String.valueOf(values[i]).substring(0, 15) + '\'');
+			} else {
+				valuesStr.add('\'' + String.valueOf(values[i]) + '\'');
+			}
 		}
 
 		addStatement(field, 'NOT IN', valuesStr);
@@ -368,19 +350,6 @@ public class QueryCondition implements QueryConditionI {
 	}
 
 	/**
-	 * Handles the creation of the 'INCLUDES' comparison operator against a given value
-	 *
-	 * @param field			A field reference to apply the operator to
-	 * @param value			The value to check against
-	 *
-	 * @return		The current instance of the QueryBuilder
-	 */
-	public QueryCondition including(SObjectField field, Object value) {
-		addStatement(field, 'INCLUDES', '(\'' + String.valueOf(value) + '\')');
-		return this;
-	}
-
-	/**
 	 * Handles the creation of the 'INCLUDES' comparison operator for a list of values
 	 *
 	 * @param field			A field reference to apply the operator to
@@ -396,19 +365,6 @@ public class QueryCondition implements QueryConditionI {
 		}
 
 		addStatement(field, 'INCLUDES', valuesStr);
-		return this;
-	}
-
-	/**
-	 * Handles the creation of the 'EXCLUDES' comparison operator against a given value
-	 *
-	 * @param field			A field reference to apply the operator to
-	 * @param value			The value to check against
-	 *
-	 * @return		The current instance of the QueryBuilder
-	 */
-	public QueryCondition excluding(SObjectField field, Object value) {
-		addStatement(field, 'EXCLUDES', '(\'' + String.valueOf(value) + '\')');
 		return this;
 	}
 
@@ -536,11 +492,9 @@ public class QueryCondition implements QueryConditionI {
 		Object isNotNull(SObjectField field);									// != null
 		Object isToday(SObjectField field);										// = TODAY
 		Object isLike(SObjectField field, String value);						// LIKE '%value%'
-		Object isIn(SObjectField field, Object value);							// IN ('Closed Won')
 		Object isIn(SObjectField field, List<Object> values);					// IN ('Closed Won', 'Closed Lost')
 		Object isIn(SObjectField field, Set<String> values);					// IN ('Closed Won', 'Closed Lost')
 		Object isIn(SObjectField field, Set<Id> values);						// IN ('0060q00000GqOQU', '0060q00000GqOOl')
-		Object isNotIn(SObjectField field, Object value);						// NOT IN ('Closed Won')
 		Object isNotIn(SObjectField field, List<Object> values);				// NOT IN ('Closed Won', 'Closed Lost')
 		Object isNotIn(SObjectField field, Set<String> values);					// NOT IN ('Closed Won', 'Closed Lost')
 		Object isNotIn(SObjectField field, Set<Id> values);						// NOT IN ('0060q00000GqOQU', '0060q00000GqOOl')
