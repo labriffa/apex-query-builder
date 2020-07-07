@@ -19,13 +19,13 @@ Apex Query Builder offers the following benefits:
         * [1.1.2. SELECT with WHERE statement](#block1.1.2)
         * [1.1.3. SELECT with aggregate functions](#block1.1.3)
         * [1.1.4. SELECT Complex Single Object](#block1.1.4)
-    * [1.2. Conditions](#block1.2)
-        * [1.2.1. Comparison Operators](#block1.2.1)
-        * [1.2.2. Logical Operators](#block1.2.2)  
-            * [1.2.1.1. AND Comparison Operator](#block1.2.2.1) 
-            * [1.2.1.2. AND Grouped Comparison Operator](#block1.2.2.2)
-            * [1.2.1.3. OR Comparison Operator](#block1.2.2.3)
-            * [1.2.1.4. OR Grouped Comparison Operator](#block1.2.2.4)
+        * [1.1.5. SELECT with related fields (cross-object SOQL query)](#block1.1.5)
+    * [1.2. Comparison Operators](#block1.2)
+    * [1.3. Logical Operators](#block1.3)
+         * [1.3.1. AND Comparison Operator](#block1.3.1) 
+         * [1.3.2. AND Grouped Comparison Operator](#block1.3.2)
+         * [1.3.3. OR Comparison Operator](#block1.3.3)
+         * [1.3.4. OR Grouped Comparison Operator](#block1.3.4)
     * [1.3. Subqueries (parent-to-child)](#block1.3)
 * [2. Authors](#block2)
 * [3. License](#block3)
@@ -153,10 +153,26 @@ new QueryBuilder(Opportunity.SObjectType)
 .toString();
 ```
 
+<a name="block1.1.5"></a>
+#### 1.1.5. SELECT with related fields (cross-object SOQL query)
+Cross-object SOQL queries are supported without the need to hardcode string references to related fields. Related fields can be added via ```selectRelatedField()```. Since Salesforce handles standard object relationships different from custom object relationships, different signatures are used to handle both use cases. In both cases the second parameter is a ```SObjectField``` reference to the parent field, in the case of standard relationships the first field should be the ```SObjectType``` reference to the parent object, whilst in the case of a custom relationship it should be a ```SObjectField``` reference to the lookup field.
+
+SOQL
+```sql
+SELECT Id, Account.Name
+FROM Contact
+```
+
+Apex Query Builder
+```apex
+new QueryBuilder(Contact.SObjectType)
+    .selectField(Contact.Id)
+    .selectRelatedField(Account.SObjectType, Account.Name)
+.toString();
+```
+
 <a name="block1.2"></a>
-### 1.2. Conditions [↑](#index_block)
-<a name="block1.2.1"></a>
-#### 1.2.1. Comparison Operators
+### 1.2. Comparison Operators [↑](#index_block)
 
 SOQL
 ```sql
@@ -180,10 +196,10 @@ Apex Query Builder
   )
 ```
 
-<a name="block1.2.2"></a>
-#### 1.2.2. Logical Operators
-<a name="block1.2.2.1"></a>
-##### 1.2.2.1 AND Comparison Operator
+<a name="block1.3"></a>
+### 1.3. Logical Operators
+<a name="block1.3.1"></a>
+#### 1.3.1. AND Comparison Operator
 **AND** operations occur implicitly if no logical operators are used in condition chaining
 
 SOQL
@@ -201,8 +217,8 @@ Apex Query Builder
   )
 ```
 
-<a name="block1.2.2.2"></a>
-##### 1.2.2.2 AND Grouped Comparison Operator
+<a name="block1.3.2"></a>
+#### 1.3.2. AND Grouped Comparison Operator
 
 SOQL
 ```sql
@@ -221,8 +237,8 @@ Apex Query Builder
       )    
   )
 ```
-<a name="block1.2.2.3"></a>
-##### 1.2.2.3 OR Comparison Operator
+<a name="block1.3.3"></a>
+#### 1.3.3. OR Comparison Operator
 
 SOQL
 ```sql
@@ -239,8 +255,8 @@ Apex Query Builder
   )
 ```
 
-<a name="block1.2.2.4"></a>
-##### 1.2.2.4 OR Grouped Comparison Operator
+<a name="block1.3.4"></a>
+#### 1.3.4. OR Grouped Comparison Operator
 
 SOQL
 ```sql
