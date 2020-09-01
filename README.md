@@ -305,7 +305,7 @@ new QueryBuilder(Account.SObjectType)
 Apex Query Builder is licensed under the MIT license.
 
 ```
-Copyright (c) 2020 Lewis Briffa
+Copyright (c) 2020 Lewis Alberto Briffa
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
