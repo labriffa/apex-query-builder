@@ -12,7 +12,18 @@ public class QueryCondition implements QueryConditionI {
    * @param comparisonOperator	The comparison operator being used e.g. = != > <=
    * @param value					The value to compare against
    */
+
   private void addStatement(SObjectField field, String comparisonOperator, Object value) {
+    if (value instanceof String) {
+      value = '\'' + value + '\'';
+    } else if (value instanceof Date) {
+      value = String.valueOf((Date) value);
+    }
+
+    this.statements.add(String.format('{0} {1} {2}', new List<Object>{ field, comparisonOperator, value }));
+  }
+
+  private void addInStatement(SObjectField field, String comparisonOperator, Object value) {
     if (value instanceof Date) {
       value = String.valueOf((Date) value);
     }
@@ -259,6 +270,7 @@ public class QueryCondition implements QueryConditionI {
    */
   public QueryCondition isIn(SObjectField field, List<Object> values) {
     List<String> valuesStr = new List<String>();
+
     for (Integer i = 0; i < values.size(); i++) {
       if (values[i] instanceof Id) {
         valuesStr.add('\'' + String.valueOf(values[i]).substring(0, 15) + '\'');
@@ -267,7 +279,7 @@ public class QueryCondition implements QueryConditionI {
       }
     }
 
-    addStatement(field, 'IN', +' (' + String.join(valuesStr, ',') + ')'); //addStatement(field, 'IN', valuesStr);
+    addInStatement(field, 'IN', '(' + String.join(valuesStr, ',') + ')');
     return this;
   }
 
@@ -316,7 +328,7 @@ public class QueryCondition implements QueryConditionI {
       }
     }
 
-    addStatement(field, 'NOT IN', valuesStr);
+    addInStatement(field, 'NOT IN', '(' + String.join(valuesStr, ',') + ')');
     return this;
   }
 
