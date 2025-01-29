@@ -185,7 +185,7 @@ public class QueryBuilder {
 	 */
 	public override String toString() {
 		// 'SELECT' clause
-		query += 'SELECT ';
+		query = 'SELECT ';
 		query += String.join(new List<String>(selectedFields), ', ');
 
 		// 'FROM' clause
